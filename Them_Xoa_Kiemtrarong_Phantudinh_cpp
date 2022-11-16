@@ -1,0 +1,53 @@
+struct Node{
+ 	int data;
+	Node* next; 
+ }; 
+ node *top = NULL; // dùng biến top để kiểm soát Stack
+
+void Push(int data)  
+{  
+    Node* temp;  
+    temp = new Node;  
+  
+    //Trường hợp không cấp phát được bộ nhớ cho temp
+    if (!temp) 
+    {  
+        cout << "\nHeap Overflow";  
+        exit(1);  
+    }  
+  
+    //Thêm temp vào đỉnh Stack, cập nhập lại biến top
+    temp->data = data;  
+    temp->link = top;   
+    top = temp;  
+} 
+void Pop()  
+{  
+    Node* temp;  
+  
+    //Kiểm tra trường hợp Stack rỗng
+    if (top == NULL)  
+    {  
+        cout << "\nStack Underflow" << endl;  
+        exit(1);  
+    }  
+    else
+    {  
+        //xóa phần tử ở top, cập nhập lại top
+        temp = top;  
+        top = top->link;   
+        temp->link = NULL;
+        delete temp;  
+    }  
+}  
+int isEmpty()  
+{  
+    return top == NULL;  
+}
+int Peek()  
+{    
+    if (!isEmpty())  
+        return top->data;  
+    else
+        exit(1);  
+}
