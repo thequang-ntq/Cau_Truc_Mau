@@ -1,0 +1,42 @@
+Node* front = NULL, rear = NULL;// dùng 2 biến front và rear để kiểm soát queue.
+
+void enQueue(int x) 
+{ 
+    Node* temp;  
+    temp = new Node;  
+  
+    //Trường hợp không cấp phát được bộ nhớ cho temp
+    if (!temp) 
+    {  
+        cout << "\nHeap Overflow";  
+        exit(1);  
+    }  
+    temp->data = x;
+    temp->next = NULL;
+  
+    //Trường hợp Queue đang rỗng.
+    if (rear == NULL) 
+    { 
+        front = rear = temp; 
+        return; 
+    } 
+  
+    //Thêm phần tử vào Queue, cập nhập lại rear
+    rear->next = temp; 
+    rear = temp; 
+} 
+void deQueue() 
+{ 
+    //Trường hợp Queue rỗng. 
+    if (front == NULL) 
+        return; 
+         
+    Node* temp = front; 
+    front = front->next; 
+  
+    //Trường hợp ban đầu Queue chỉ có 1 phần tử
+    if (front == NULL) 
+        rear = NULL; 
+  
+    delete temp; 
+} 
