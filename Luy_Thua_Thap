@@ -1,0 +1,1 @@
+while(true){long long a , b , c;cin >> a >> b >> c;if(a == -1 && b == -1 && c == -1) break;if(c == 0) cout << (a % M) <<endl;elseif(b == 0) cout <<"1" << endl;elseif(a % M == 0) cout <<"0"<<endl;else {long long result1 = powMod( b , c , M - 1);long long result2 = powMod(a , result1 , M);cout << result1 << endl;}}
