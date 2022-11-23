@@ -1,0 +1,66 @@
+#include <bits/stdc++.h>
+#define taskname "E"
+using namespace std;
+ 
+template <typename T>
+struct Vector {
+	T x, y;
+ 
+	Vector(T a = 0, T b = 0) : x(a), y(b) {}
+	friend T cross(const Vector &a, const Vector &b){
+		return a.x * b.y - a.y * b.x;
+	}
+};
+ 
+template <typename T>
+struct Point {
+	T x, y;
+ 
+	Point(T a = 0, T b = 0) : x(a), y(b) {}
+	friend Vector<T> operator -(const Point &a, const Point &b) {
+		return Vector<T>(b.x - a.x, b.y - a.y);
+	}
+};
+
+long long TwoArea(const vector<Point<long long>> &P){
+	long long area = 0;
+	for (int i = 2; i < P.size(); i++) 
+		area += cross(P[i] - P[0], P[i-1] - P[0]);
+	return abs(area);
+}
+ 
+void Input(){
+	ios_base::sync_with_stdio(false);
+	cin.tie(0); cout.tie(0);
+	if(fopen(taskname".inp", "r")){
+		freopen(taskname".inp", "r", stdin);
+		freopen(taskname".out", "w", stdout);
+	}
+}
+ 
+void Solve(){
+	int n; cin >> n;
+	vector<array<long long, 3>> A;
+	
+	for (int i = 1; i <= n; i++) {
+		int k; cin >> k;
+		vector<Point<long long>> P(k);
+		for (auto &j: P) cin >> j.x >> j.y;
+		A.push_back({TwoArea(P), i, 0});
+	}
+
+	sort(A.begin(), A.end());
+	for (int i = 0; i < n; i++) A[i][2] = n - i - 1;
+	sort(A.begin(), A.end(), [](array<long long, 3> a, array<long long, 3> b){
+		return a[1] < b[1];
+	});
+
+	for (int i = 0; i < n; i++)
+		cout << A[i][2] << "\n";
+}	
+ 
+int main(){
+	Input();
+	Solve();
+	return 0;
+}
