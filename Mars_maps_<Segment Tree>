@@ -1,0 +1,77 @@
+#include <iostream>
+#include <fstream>
+#include <algorithm>#
+define max_n 30000
+using namespace std;
+struct edge{
+int x, y0, y1, d;
+};
+struct sosanh{
+  bool operator() (edge x, edge y){
+  if (x.x == y.x) return ((x.d == -1) && (y.d == 1));
+  return x.x < y.x;
+  }
+} myss;
+edge *es;
+int n, maxy = 0, miny = max_n;
+long *v, *sum;
+void doc(){
+  fstream f; int i, x0, x1, y0, y1; long c; 
+  f.open("mars.in", ios::in);
+  f >> n; n *= 2;
+  es = new edge[n];
+  for (i = 0; i < n; i++){
+    f >> x0 >> y0 >> x1 >> y1;
+    if (y0 < miny) miny = y0; //gia tri nho nhat cua y
+    if (y1 > maxy) maxy = y1; //gia tri lon nhat cua y
+    es[i].x = x0;
+    es[i].y0 = y0;
+    es[i].y1 = y1;
+    es[i].d = 1;
+    i++;
+    es[i].x = x1;
+    es[i].y0 = y0;
+    es[i].y1 = y1;
+    es[i].d = -1;
+   }
+   f.close();
+   sort(es, es + n, myss);
+   c = log(log(maxy - miny + 1) / log(2)) / log(2);
+   c = long(powl(2, log(maxy - miny + 1) / log(2) + c + 3)); //tim so phantu de khai bao cay can bang dua theo miny maxy
+   v = new long[c];
+   sum = new long[c];
+   memset(v, 0, c); //set gia tri 0
+   memset(sum, 0, c);
+ }
+void correct(long long no, int no0, int no1){
+  if (v[no] > 0) sum[no] = no1 - no0; //cong doan no0 no1 vao sum[no]
+  else{
+    sum[no] = 0;
+    if (no0 < no1) sum[no] = sum[no * 2 + 1] + sum[no * 2 + 2]; //cap nhat lai nut phiatren
+  }
+}
+void modify(long long no, int y0, int y1, int no0, int no1, int det){
+  int m;
+   if ((y0 <= no0) && (no1 <= y1)) v[no] += det; // cay nhi phan can bang, cho biet so luong canh chonglen mien gia tri tu no0 den no1, neu mien no0 no1 nam gon tron y0y1 thi cong 1 neu la canh dau hinh chu nhat -1 neu canh cuoi
+   else{
+      m = (no0 + no1) / 2; //be doi doan no0 no1
+      if (y0 < m) //neu 1 phan cua doan y0 y1 co chua trong nua ben trai
+          modify(no * 2 + 1, y0, y1, no0, m, det);
+      if (m < y1) //neu 1 phan cua doan y0 y1 co chua trong nua ben phai
+          modify(no * 2 + 2, y0, y1, m, no1, det);
+    }
+    correct(no, no0, no1); //cap nhat lai tong
+  }
+ int main(){
+      long long las = 0, ar = 0;  fstream f; f.open("mars.out", ios::out);
+      doc();
+      for (int i = 0; i < n; i++){
+        ar += sum[0] * (es[i].x - las); //cong them dien tich mien vua quetduoc vao ar
+        las = es[i].x; //luu lai vi tri x o canh truoc
+        modify(0, es[i].y0, es[i].y1, miny, maxy, es[i].d);
+       }
+       f << ar;
+       f.close();
+       return 0;
+   }
+
