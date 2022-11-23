@@ -1,0 +1,161 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+struct point
+{
+    int x, y;
+    bool operator < (point a)
+    {
+        return x < a.x || (x == a.x && y < a.y);
+    }
+    bool on_Segment(point a, point b)
+    {
+        if (ccw(a, b) != 0)
+            return false;
+        int minx = min(a.x, b.x);
+        int miny = min(a.y, b.y);
+        int maxx = max(a.x, b.x);
+        int maxy = max(a.y, b.y);
+        return minx <= x && x <= maxx && miny <= y && y <= maxy;
+    }
+    int ccw(point a, point b)
+    {
+        int c = x * (a.y - b.y) + a.x * (b.y - y) + b.x * (y - a.y);
+        if (c == 0)
+            return 0;
+        if (c > 0)
+            return 1;
+        return - 1;
+    }
+};
+
+struct line
+{
+    point M, N;
+    line() {}
+    line(point a, point b)
+    {
+        M = a, N = b;
+    }
+    bool operator != (line a)
+    {
+        return M.y - M.x != a.M.y - a.M.x;
+    }
+    bool can_Intersect(line a)
+    {
+        if (M.on_Segment(a.M, a.N) == true || N.on_Segment(a.M, a.N) == true || a.M.on_Segment(M, N) == true || a.N.on_Segment(M, N) == true)
+            return true;
+        if (M.ccw(a.M, a.N) != N.ccw(a.M, a.N) && a.M.ccw(M, N) != a.N.ccw(M, N))
+            return true;
+        return false;
+    }
+    bool can_Intersect_2(line a, line b)
+    {
+        if (M.ccw(a.M, a.N) * M.ccw(b.M, b.N) < 0)
+            return true;
+        if (N.ccw(a.M, a.N) * N.ccw(b.M, b.N) < 0)
+            return true;
+        if (can_Intersect(a) == true && can_Intersect(b) == true)
+            return true;
+        return false;
+    }
+    bool overlap(line a)
+    {
+        if (M.ccw(a.M, a.N) == 0 && N.ccw(a.M, a.N) == 0)
+            if (can_Intersect(a) == true)
+                return true;
+        return false;
+    }
+};
+
+bool cmp1(line a, line b)
+{
+    return a.M.y - a.M.x < b.M.y - b.M.x;
+}
+
+bool cmp2(line a, line b)
+{
+    return a.M.x + a.M.y < b.M.x + b.M.y;
+}
+
+int main()
+{
+    ios_base :: sync_with_stdio(false); cin.tie(0); cout.tie(0);
+    if (fopen("test.inp", "r"))
+    {
+        freopen("test.inp", "r", stdin);
+        freopen("test.out", "w", stdout);
+    }
+    int n;
+    cin >> n;
+    vector <line> l(n);
+    for (int i = 0; i < n; ++i)
+        cin >> l[i].M.x >> l[i].M.y >> l[i].N.x >> l[i].N.y;
+    bool status = true;
+    while (status == true)
+    {
+        status = false;
+        for (int i = 0; i < l.size(); ++i)
+            for (int j = i + 1; j < l.size(); ++j)
+                if (l[i].overlap(l[j]) == true)
+                {
+                    status = true;
+                    vector <point> p(4);
+                    p[0] = l[i].M, p[1] = l[i].N, p[2] = l[j].M, p[3] = l[j].N;
+                    sort(p.begin(), p.end());
+                    l[i] = line(p[0], p[3]);
+                    l.erase(l.begin() + j);
+                    break;
+                }
+    }
+    for (int i = 0; i < l.size(); ++i)
+        if (l[i].M.x > l[i].N.x)
+            swap(l[i].M, l[i].N);
+    vector <line> l1, l2;
+    for (auto i : l)
+        if (i.M.y < i.N.y)
+            l1.push_back(i);
+        else
+            l2.push_back(i);
+    if (l1.size() < 2 || l2.size() < 2)
+        return cout << - 1, 0;
+    sort(l1.begin(), l1.end(), cmp1);
+    sort(l2.begin(), l2.end(), cmp2);
+    int ans = 0;
+    for (int i = 0; i < l1.size() - 1; ++i)
+        for (int j = i + 1; j < l1.size(); ++j)
+            if (l1[i] != l1[j])
+            {
+
+                vector <line> l3;
+                for (auto k : l2)
+                    if (l1[i].can_Intersect(k) == true && l1[j].can_Intersect(k) == true)
+                        l3.push_back(k);
+                if (l3.size() < 2)
+                    continue;
+                for (int k1 = 0; k1 < l3.size() - 1; ++k1)
+                {
+                    bool checking = true;
+                    for (int k2 = i + 1; k2 < j; ++k2)
+                        if (l1[k2] != l1[i] && l1[k2] != l1[j] && l1[k2].can_Intersect_2(l3[k1], l3[k1 + 1]) == true)
+                        {
+                            checking = false;
+                            break;
+                        }
+                    if (checking == true)
+                    {
+                        int a = l1[i].M.x - l1[i].M.y;
+                        int b = l1[j].M.x - l1[j].M.y;
+                        int c = l3[k1].M.x + l3[k1].M.y;
+                        int d = l3[k1 + 1].M.x + l3[k1 + 1].M.y;
+                        int e = abs(a - b);
+                        int f = abs(c - d);
+                        ans = max(ans, e * f);
+                    }
+                }
+            }
+    if (ans == 0)
+        return cout << - 1, 0;
+    cout << fixed << setprecision(1) << (long double)ans / 2.0;
+}
